@@ -112,10 +112,18 @@ def printLCD(pressed, temp):
     # TODO: implement printLCD, remove pass if implemented
     while not i2c.try_lock():
         time.sleep(0.1)
+
+    now = rtc.datetime
+    time_str = f"{now.tm_hour:02}:{now.tm_min:02}:{now.tm_sec:02}"
+
     if pressed == True:
-        i2c.writeto(LCD_ADDR,f"I like u, temp = {temp}")
+        msg = f" hello, temp = {temp:.1f}"
     else:
-        i2c.writeto(LCD_ADDR,f"I hate u, temp = {temp}")
+        msg = f"  bye, temp = {temp:.1f}"
+    full = f"{time_str}\n{msg}"
+
+    i2c.writeto(LCD_ADDR, full.encode("utf-8"))
+
     i2c.unlock()
     return pressed
 
