@@ -1,6 +1,6 @@
 # Write your code here :-)
 ################################################################
-# 18-100 F23 Lab07: I2C Lab Starter Code
+# 18-100 F25 Lab07: I2C Lab Starter Code
 #
 # version log:
 # Mar 06, 2022 - initial version - M Nguyen <mnguyen2>
@@ -39,8 +39,7 @@ led.direction = digitalio.Direction.OUTPUT
 
 #               scl0(GP5)      sda0(GP4)      100kHz
 i2c = busio.I2C(scl=board.GP5, sda=board.GP4, frequency=100000)
-rtc_i2c = busio.I2C(scl=board.GP3, sda=board.GP2, frequency=100000)
-rtc = adafruit_ds3231.DS3231(rtc_i2c)
+rtc = adafruit_ds3231.DS3231(i2c)
 
 # @brief scan the I2C line and return a list of all addresses which respond
 # @return list of addresses which respond to I2C prompt
@@ -108,12 +107,11 @@ def clearLCD():
 # @param[in]    pressed - whether the button is pressed or not
 # @param[in]    temp - current temperature in Celsius as a floating point number
 # @return       whether or not the button has been pressed
-def printLCD(pressed, temp):
+def printLCD(pressed, temp,now):
     # TODO: implement printLCD, remove pass if implemented
     while not i2c.try_lock():
         time.sleep(0.1)
 
-    now = rtc.datetime
     time_str = f"{now.tm_hour:02}:{now.tm_min:02}:{now.tm_sec:02}"
 
     if pressed == True:
@@ -126,7 +124,6 @@ def printLCD(pressed, temp):
 
     i2c.unlock()
     return pressed
-
 
 # @brief        clear the LCD
 # @param[in]    r (0-255) red color mix
@@ -150,10 +147,10 @@ lightCounter = 0
 while True:
     # uncomment this to check which devices are connected
     # print([hex(i) for i in checkDevices()])
+    temp = readTemp()
+    pressed = readBtnStatus()
     now = rtc.datetime
     print(f"Current time: {now.tm_hour:02}:{now.tm_min:02}:{now.tm_sec:02}")
-
-    time.sleep(1)
 
     # inserts return value of readTemp() into "It's a lovely {} C today!" and prints
     print(f"It's a lovely {readTemp()} C today!")
@@ -169,7 +166,7 @@ while True:
         setBackLight(0,225,200)
 
     clearLCD()
-    printLCD(readBtnStatus(),readTemp())
+    printLCD(pressed, temp, now)
 
 # technically we need to release the I2C object but for our purposes we never will
 i2c.deinit()
