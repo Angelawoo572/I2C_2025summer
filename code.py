@@ -191,18 +191,24 @@ def setBackLight(r, g, b):
 
 
 lightCounter = 0
+now = readClock()
+last_minute = now.tm_min
+temp = readTemp()
 # setClock(2025, 7, 7, 19, 07, 0)
 while True:
     # uncomment this to check which devices are connected
     # print([hex(i) for i in checkDevices()])
-    temp = readTemp()
-    pressed = readBtnStatus()
     # now = rtc.datetime
+    pressed = readBtnStatus()
     now = readClock()
     print(f"Current time: {now.tm_hour:02}:{now.tm_min:02}:{now.tm_sec:02}")
 
-    # inserts return value of readTemp() into "It's a lovely {} C today!" and prints
-    print(f"It's a lovely {readTemp()} C today!")
+    if now.tm_min != last_minute:
+        last_minute = now.tm_min
+        temp = readTemp()
+        # inserts return value of readTemp() into "It's a lovely {} C today!" and prints
+        print(f"It's a lovely {readTemp()} C today!")
+
     led.value = bool(lightCounter % 2)
     lightCounter += 1
     # TODO: you'll want to tune this delay to get more frequent results
